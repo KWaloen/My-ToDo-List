@@ -1,12 +1,14 @@
 //use client is necessary for NextJS to not throw a hissy fit
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { NewToDoForm } from "./NewToDoForm"
 import { ToDoList } from "./ToDoList"
 
 
 export default function Home() {
+
+  //HOOKS IN REACT HAVE TO BE CALLED AT THE TOP OF THE FUNCTION
 
   //syntax of useState: const [state, setState] = useState(initialState);
 
@@ -17,7 +19,18 @@ export default function Home() {
   //initialState is the initial value of the state
   //without the types: useState([]) shows that the useState initalizes with an empty array which will be used to store the elements
 
-  const [todos, setTodos] = useState<{ id: string; title: string; completed: boolean; }[]>([])
+
+  //reads through local storage and finds ITEMS and if it is not empty it returns it
+  const [todos, setTodos] = useState<{ id: string; title: string; completed: boolean; }[]>(() => {
+    const localValue = localStorage.getItem("ITEMS")
+    if (localValue == null) return []
+    return JSON.parse(localValue)
+  })
+
+  //use effect stores items in local storage in string format
+  useEffect(() => {
+    localStorage.setItem("ITEMS", JSON.stringify(todos))
+  }, [todos])
 
   //this updates the state of the todo list
   //currentTodos are retrieved from the useState hook declared above
