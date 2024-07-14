@@ -2,62 +2,71 @@
 "use client"
 
 import { useState } from "react"
-
+import { NewToDoForm } from "./NewToDoForm"
+import { ToDoList } from "./ToDoList"
 
 
 export default function Home() {
-  
-  const [newItem, setNewItem] = useState("")
-  const [todos, setTodos] = useState<{ id: number; title: string; completed: boolean; }[]>([])
 
-  function handleSubmit(item: React.FormEvent<HTMLFormElement>) {
-    //prevents refreshing the page after clicking the button
-    item.preventDefault();
+  //syntax of useState: const [state, setState] = useState(initialState);
 
+  //state is the current state value 
+
+  //when this function is called, React schedules a re-render of the component, applying the new state
+
+  //initialState is the initial value of the state
+  //without the types: useState([]) shows that the useState initalizes with an empty array which will be used to store the elements
+
+  const [todos, setTodos] = useState<{ id: string; title: string; completed: boolean; }[]>([])
+
+  //this updates the state of the todo list
+  //currentTodos are retrieved from the useState hook declared above
+  //When you call setTodos with a function, React will automatically pass the current state as an argument to that function. 
+  //This is why you see currentTodos as a parameter in the function you provide to setTodos.
+  function addTodo(title: string) {
     setTodos((currentTodos) => {
       return [
-      ...currentTodos, 
-      {id: currentTodos.length, title: newItem, completed: false},
+        ...currentTodos,
+        { id: crypto.randomUUID(), title, completed: false },
       ]
     })
   }
-  
-  console.log(todos)
+
+  function toggleTodo(toggleId: string, isCompleted: boolean) {
+    setTodos(currentTodos => {
+      return currentTodos.map(todo => {
+        if (todo.id === toggleId) {
+          return { ...todo, completed:isCompleted }
+        }
+
+        return todo
+      })
+    })
+  }
+
+ 
+
+  function deleteTodo(idToDelete: string) {
+    setTodos(currentTodos => {
+      //filter returns everything that fulfills the condition
+      //in this case, return everything that does not have the idToDelete value
+      return currentTodos.filter(todo => todo.id !== idToDelete)
+    })
+  }
+
+  console.log(todos);
 
   return (
     //upon clicking the button, the onSubmit event listener triggers the handleSubmit method
-    <div> 
-      <form onSubmit={handleSubmit} className="new-item-form">
-        <div className="form-row">
-          <label htmlFor="item">New Item</label>
-          <input 
-          value={newItem}
-          //this allows the text field to be updated 
-          onChange={item => setNewItem(item.target.value)} 
-          type="text" 
-          id="item" />
-        </div>
-        <button className="btn">Add</button>
-      </form>
+    <div>
+
+      <NewToDoForm onSubmit={addTodo} />
+
       <h1 className="header">Todo List</h1>
 
-      <ul className="list">
-        <li>
-          <label>
-            <input type="checkbox" />
-            Item 1
-          </label>
-          <button className="btn btn-danger">Delete</button>
-        </li>
-        <li>
-          <label>
-            <input type="checkbox" />
-            Item 2
-          </label>
-          <button className="btn btn-danger">Delete</button>
-        </li>
+      <ToDoList todos={todos} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
 
-      </ul>
+
     </div>
   )
 }
